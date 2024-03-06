@@ -51,13 +51,13 @@ public class MappingRunner implements CommandLineRunner {
 //			System.out.println("Unable to save Address");
 //		}
 
-//		if (instituteRepo.save(nareshit).getInstituteId() != null) {
-//			System.out.println("Institute saved Successfully");
-//		} else {
-//			System.out.println("Unable to save Institute");
-//		}
+		if (instituteRepo.save(nareshit).getInstituteId() != null) {
+			System.out.println("Institute saved Successfully");
+		} else {
+			System.out.println("Unable to save Institute");
+		}
 		
-		addressRepo.deleteById(2);
+//		addressRepo.deleteById(2);
 	}
 
 }

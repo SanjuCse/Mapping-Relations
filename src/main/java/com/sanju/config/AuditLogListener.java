@@ -21,6 +21,67 @@ public class AuditLogListener implements PostInsertEventListener, PostUpdateEven
 	@Autowired
 	private AuditLogRepository auditLogRepository;
 
+//	@Override
+//	public void onPostInsert(PostInsertEvent event) {
+//		Object entity = event.getEntity();
+//		if (!(entity instanceof AuditLog)) {
+//			AuditLog auditLog = new AuditLog();
+//			auditLog.setEntityName(entity.getClass().getName());
+//			auditLog.setAction("INSERT");
+//
+////          String username = SecurityContextHolder.getContext().getAuthentication().getName();
+//			String username = null;
+//			auditLog.setUsername(username);
+//
+//			LocalDateTime timestamp = LocalDateTime.now();
+//			auditLog.setTimestamp(timestamp);
+//
+//			auditLog.setEntityId(event.getId().toString());
+//
+//			Object[] state = event.getState();
+//			StringBuilder entityDataBuilder = new StringBuilder();
+//			for (Object value : state) {
+//				if (entityDataBuilder.length() > 0) {
+//					entityDataBuilder.append(", ");
+//				}
+//				entityDataBuilder.append(value);
+//			}
+//			auditLog.setEntityData(entityDataBuilder.toString());
+//
+//			auditLogRepository.save(auditLog);
+//		}
+//	}
+//
+//	@Override
+//	public void onPostUpdate(PostUpdateEvent event) {
+//		Object entity = event.getEntity();
+//		if (!(entity instanceof AuditLog)) {
+//			AuditLog auditLog = new AuditLog();
+//			auditLog.setEntityName(entity.getClass().getName());
+//			auditLog.setAction("UPDATE");
+//
+//			String username = null;
+//			auditLog.setUsername(username);
+//
+//			LocalDateTime timestamp = LocalDateTime.now();
+//			auditLog.setTimestamp(timestamp);
+//
+//			auditLog.setEntityId(event.getId().toString());
+//
+//			Object[] newState = event.getState();
+//			StringBuilder entityDataBuilder = new StringBuilder();
+//			for (Object value : newState) {
+//				if (entityDataBuilder.length() > 0) {
+//					entityDataBuilder.append(", ");
+//				}
+//				entityDataBuilder.append(value);
+//			}
+//			auditLog.setEntityData(entityDataBuilder.toString());
+//
+//			auditLogRepository.save(auditLog);
+//		}
+//	}
+
 	@Override
 	public void onPostInsert(PostInsertEvent event) {
 		Object entity = event.getEntity();
@@ -29,24 +90,16 @@ public class AuditLogListener implements PostInsertEventListener, PostUpdateEven
 			auditLog.setEntityName(entity.getClass().getName());
 			auditLog.setAction("INSERT");
 
-//          String username = SecurityContextHolder.getContext().getAuthentication().getName();
+//			String username = SecurityContextHolder.getContext().getAuthentication().getName();
 			String username = null;
 			auditLog.setUsername(username);
 
 			LocalDateTime timestamp = LocalDateTime.now();
 			auditLog.setTimestamp(timestamp);
-
+			
 			auditLog.setEntityId(event.getId().toString());
 
-			Object[] state = event.getState();
-			StringBuilder entityDataBuilder = new StringBuilder();
-			for (Object value : state) {
-				if (entityDataBuilder.length() > 0) {
-					entityDataBuilder.append(", ");
-				}
-				entityDataBuilder.append(value);
-			}
-			auditLog.setEntityData(entityDataBuilder.toString());
+			auditLog.setNewValue(getEntityData(entity));
 
 			auditLogRepository.save(auditLog);
 		}
@@ -60,27 +113,22 @@ public class AuditLogListener implements PostInsertEventListener, PostUpdateEven
 			auditLog.setEntityName(entity.getClass().getName());
 			auditLog.setAction("UPDATE");
 
+//			String username = SecurityContextHolder.getContext().getAuthentication().getName();
 			String username = null;
 			auditLog.setUsername(username);
 
 			LocalDateTime timestamp = LocalDateTime.now();
 			auditLog.setTimestamp(timestamp);
-
+			
 			auditLog.setEntityId(event.getId().toString());
 
-			Object[] newState = event.getState();
-			StringBuilder entityDataBuilder = new StringBuilder();
-			for (Object value : newState) {
-				if (entityDataBuilder.length() > 0) {
-					entityDataBuilder.append(", ");
-				}
-				entityDataBuilder.append(value);
-			}
-			auditLog.setEntityData(entityDataBuilder.toString());
+			auditLog.setOldValue(getEntityData(event.getOldState()));
+			auditLog.setNewValue(getEntityData(entity));
 
 			auditLogRepository.save(auditLog);
 		}
 	}
+
 
 	@Override
 	public void onPostDelete(PostDeleteEvent event) {
@@ -102,6 +150,10 @@ public class AuditLogListener implements PostInsertEventListener, PostUpdateEven
 		}
 	}
 
+	private String getEntityData(Object entity) {
+		return entity.toString();
+	}
+	
 	@Override
 	public boolean requiresPostCommitHandling(EntityPersister persister) {
 		return true;

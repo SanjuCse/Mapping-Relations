@@ -24,10 +24,17 @@ public class EnversConfiguration {
 //        registry.appendListeners(EventType.POST_INSERT, auditLogListener);
 //    }
     
+//    @PostConstruct
+//    protected void init() {
+//        SessionFactoryImplementor sessionFactory = entityManagerFactory.unwrap(SessionFactoryImplementor.class);
+//        EventListenerRegistry registry = sessionFactory.getServiceRegistry().getService(EventListenerRegistry.class);
+//        registry.appendListeners(EventType.POST_INSERT, auditLogListener);
+//    }
     @PostConstruct
     protected void init() {
         SessionFactoryImplementor sessionFactory = entityManagerFactory.unwrap(SessionFactoryImplementor.class);
         EventListenerRegistry registry = sessionFactory.getServiceRegistry().getService(EventListenerRegistry.class);
         registry.appendListeners(EventType.POST_INSERT, auditLogListener);
+        registry.appendListeners(EventType.POST_UPDATE, auditLogListener);
     }
 }
