@@ -1,4 +1,4 @@
-package com.sanju.config;
+package audit;
 
 import java.time.LocalDateTime;
 
@@ -15,8 +15,8 @@ import org.springframework.stereotype.Component;
 import com.sanju.model.AuditLog;
 import com.sanju.repo.AuditLogRepository;
 
-@Component
-public class AuditLogListener implements PostInsertEventListener, PostUpdateEventListener, PostDeleteEventListener {
+//@Component
+public class AuditLogListener1 implements PostInsertEventListener, PostUpdateEventListener, PostDeleteEventListener {
 
 	@Autowired
 	private AuditLogRepository auditLogRepository;

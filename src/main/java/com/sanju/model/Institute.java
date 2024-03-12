@@ -4,6 +4,7 @@ import java.util.List;
 
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,23 +21,25 @@ import lombok.ToString;
 @Entity
 @Setter
 @Getter
-//@ToString
+@ToString
 @RequiredArgsConstructor
 @NoArgsConstructor
 public class Institute {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer instituteId;
+	@Column(name = "institute_id")
+	private Integer institute_id;
 
 	@Nonnull
+	@Column(name = "institute_name")
 	private String instituteName;
 
 //	@Nonnull
 	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(referencedColumnName = "addressId")
+	@JoinColumn(name = "address_id", referencedColumnName = "address_id")
 	private Address address;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "institute")
+	@OneToMany(cascade = CascadeType.ALL/*, mappedBy = "institute_id"*/)
 //	@JoinColumn(referencedColumnName = "institute")
 	private List<Student> students;
 }

@@ -2,6 +2,7 @@ package com.sanju.model;
 
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,19 +23,23 @@ import lombok.ToString;
 public class Address {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "address_id")
 	private Integer addressId;
 
 	@Nonnull
+	@Column(name = "city")
 	private String city;
 
 	@Nonnull
+	@Column(name = "state")
 	private String state;
 
 	@Nonnull
+	@Column(name = "country")
 	private String country;
 
 //	@Nonnull
 	@OneToOne(cascade = CascadeType.ALL /* , mappedBy = "address" */)
-	@JoinColumn(referencedColumnName = "instituteId")
-	private Institute institute;
+	@JoinColumn(name = "institute_id"/*, referencedColumnName = "institute_id"*/)
+	private Institute institute_id;
 }

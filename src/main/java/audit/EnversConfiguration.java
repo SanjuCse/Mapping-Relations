@@ -1,4 +1,4 @@
-package com.sanju.config;
+package audit;
 
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.event.service.spi.EventListenerRegistry;
@@ -16,7 +16,7 @@ public class EnversConfiguration {
     private EntityManagerFactory entityManagerFactory;
 
     @Autowired
-    private AuditLogListener auditLogListener;
+    private AuditLogListener1 auditLogListener;
 
 //    @PostConstruct
 //    protected void init() {
