@@ -1,6 +1,9 @@
 package com.sanju.runner;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -15,6 +18,7 @@ import com.sanju.repo.AddressRepo;
 import com.sanju.repo.CarRepository;
 import com.sanju.repo.InstituteRepo;
 import com.sanju.repo.StudentRepo;
+import com.sanju.response.StudentProcResponse;
 
 @Component
 public class MappingRunner implements CommandLineRunner {
@@ -71,10 +75,31 @@ public class MappingRunner implements CommandLineRunner {
 //		List<Car> carsAfter2020 = carRepository.findCarsAfterYear(2020);
 //		carsAfter2020.stream().forEach(System.out::println);
 		
-		List<Student> studentData = studentRepo.getStudentData();
-		studentData.stream().forEach(System.out::println);
+//		List<Student> studentData = studentRepo.getStudentData();
+//		studentData.stream().forEach(System.out::println);
 		
 //		addressRepo.deleteById(2);
+		
+		
+		Map<String, Object> studentData = studentRepo.getStudentData();
+		Set<String> keySet = studentData.keySet();
+		Collection<Object> values = studentData.values();
+//		keySet.stream().forEach(System.out::println);
+		
+//		keySet.stream().map(key->studentData.get(key)).forEach(System.out::println);
+		keySet.stream().map(studentData::get).forEach(System.out::println);
+		
+//		for (String string : keySet) {
+//			Object object = studentData.get(string);
+//			System.out.println(object);
+//		}
+		
+//		for (Object object : values) {
+//			System.out.println(object);
+//		}
+		
+//		StudentProcResponse studentData = studentRepo.getStudentData();
+//		System.out.println(studentData);
 	}
 
 }
