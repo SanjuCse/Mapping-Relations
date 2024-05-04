@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -24,22 +25,22 @@ import lombok.ToString;
 @ToString
 @RequiredArgsConstructor
 @NoArgsConstructor
+@Table(name = "INSTITUTE_DETAILS")
 public class Institute {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "institute_id")
-	private Integer institute_id;
+	@Column(name = "INSTITUTE_ID")
+	private Integer instituteId;
 
 	@Nonnull
-	@Column(name = "institute_name")
+	@Column(name = "INSTITUTE_NAME")
 	private String instituteName;
 
 //	@Nonnull
 	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "address_id", referencedColumnName = "address_id")
+	@JoinColumn(name = "ADDRESS_ID")
 	private Address address;
 
-	@OneToMany(cascade = CascadeType.ALL/*, mappedBy = "institute_id"*/)
-//	@JoinColumn(referencedColumnName = "institute")
+	@OneToMany(cascade = CascadeType.ALL)
 	private List<Student> students;
 }

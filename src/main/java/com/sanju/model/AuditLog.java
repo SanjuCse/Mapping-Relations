@@ -15,36 +15,38 @@ import lombok.Setter;
 @Entity
 @Setter
 @Getter
-@Table(name = "audit_log")
+@Table(name = "AUDIT_LOG")
 public class AuditLog {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
+	@Column(name = "AUDIT_DETAILS_ID")
 	private Long id;
 
-	@Column(name = "entity_name", length = 50)
-	private String entityName;
+	@Column(name = "TABLE_NAME", length = 50)
+	private String tableName;
+	
+	@Column(name = "COLUMN_NAME", length = 100)
+	private String columnName;
 
 	@Lob
-	@Column(name = "entity_id", length = 5)
+	@Column(name = "ENTITY_ID", length = 5)
 	private String entityId;
 
 //	@Lob
 //	private String entityData;
 
-	@Column(name = "old_value", length = 20)
+	@Column(name = "OLD_VALUE", columnDefinition = "text")
 	private String oldValue;
 
-	@Column(name = "new_value", length = 20)
+	@Column(name = "NEW_VALUE", columnDefinition = "text")
 	private String newValue;
 
-	@Column(name = "action", length = 10)
+	@Column(name = "ACTION", length = 10)
 	private String action;
 
-	@Column(name = "username", length = 20)
+	@Column(name = "USERNAME", length = 20)
 	private String username;
 
-	@Column(name = "timestamp")
+	@Column(name = "TIMESTAMP")
 	private LocalDateTime timestamp;
 }

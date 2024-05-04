@@ -1,16 +1,12 @@
 package com.sanju.runner;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import com.sanju.model.Address;
-import com.sanju.model.Car;
 import com.sanju.model.Course;
 import com.sanju.model.Institute;
 import com.sanju.model.Student;
@@ -18,7 +14,6 @@ import com.sanju.repo.AddressRepo;
 import com.sanju.repo.CarRepository;
 import com.sanju.repo.InstituteRepo;
 import com.sanju.repo.StudentRepo;
-import com.sanju.response.StudentProcResponse;
 
 @Component
 public class MappingRunner implements CommandLineRunner {
@@ -42,13 +37,13 @@ public class MappingRunner implements CommandLineRunner {
 
 		Institute itSoft = new Institute("XYZ Institute");
 		Address instituteAddress = new Address("Hyd", "Telengana", "India");
-		instituteAddress.setInstitute_id(itSoft);
+		instituteAddress.setInstituteId(itSoft);
 
 		itSoft.setAddress(instituteAddress);
 		itSoft.setStudents(List.of(sanju, prakash));
 
-		sanju.setInstitute_id(itSoft);
-		prakash.setInstitute_id(itSoft);
+		sanju.setInstituteId(itSoft);
+		prakash.setInstituteId(itSoft);
 
 		Course java = new Course("java");
 		Course python = new Course("python");
@@ -80,14 +75,14 @@ public class MappingRunner implements CommandLineRunner {
 		
 //		addressRepo.deleteById(2);
 		
+//		Map<String, Object> studentData = studentRepo.getStudentData();
+//		Set<String> keySet = studentData.keySet();
+//		Collection<Object> values = studentData.values();
 		
-		Map<String, Object> studentData = studentRepo.getStudentData();
-		Set<String> keySet = studentData.keySet();
-		Collection<Object> values = studentData.values();
 //		keySet.stream().forEach(System.out::println);
 		
 //		keySet.stream().map(key->studentData.get(key)).forEach(System.out::println);
-		keySet.stream().map(studentData::get).forEach(System.out::println);
+//		keySet.stream().map(studentData::get).forEach(System.out::println);
 		
 //		for (String string : keySet) {
 //			Object object = studentData.get(string);
@@ -100,6 +95,17 @@ public class MappingRunner implements CommandLineRunner {
 		
 //		StudentProcResponse studentData = studentRepo.getStudentData();
 //		System.out.println(studentData);
+		
+//		List<Map<String, Object>> studentData = studentRepo.getStudentData();
+//		for (Map<String, Object> map : studentData) {
+//			Set<String> keySet = map.keySet();
+//			Collection<Object> values = map.values();
+			
+//		keySet.stream().forEach(System.out::println);
+			
+//		keySet.stream().map(key->studentData.get(key)).forEach(System.out::println);
+//		keySet.stream().map(map::get).forEach(System.out::println);
+//		}
 	}
 
 }

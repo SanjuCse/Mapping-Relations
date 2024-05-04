@@ -9,37 +9,38 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 @Entity
 @Setter
 @Getter
 @RequiredArgsConstructor
 @NoArgsConstructor
+@Table(name = "ADDRESS_DETAILS")
 public class Address {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "address_id")
+	@Column(name = "ADDRESS_ID")
 	private Integer addressId;
 
 	@Nonnull
-	@Column(name = "city")
+	@Column(name = "CITY_NAME")
 	private String city;
 
 	@Nonnull
-	@Column(name = "state")
+	@Column(name = "STATE_NAME")
 	private String state;
 
 	@Nonnull
-	@Column(name = "country")
+	@Column(name = "COUNTRY_NAME")
 	private String country;
 
 //	@Nonnull
-	@OneToOne(cascade = CascadeType.ALL /* , mappedBy = "address" */)
-	@JoinColumn(name = "institute_id"/*, referencedColumnName = "institute_id"*/)
-	private Institute institute_id;
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "INSTITUTE_ID")
+	private Institute instituteId;
 }

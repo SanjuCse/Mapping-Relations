@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.NamedStoredProcedureQuery;
 import jakarta.persistence.ParameterMode;
 import jakarta.persistence.StoredProcedureParameter;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -32,15 +33,17 @@ import lombok.ToString;
 						) 
 				}
 )
+
+@Table(name = "CAR_DETAILS")
 public class Car {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "car_id")
+	@Column(name = "CAR_ID")
 	private Long id;
 
-	@Column(name = "model", length = 50)
+	@Column(name = "CAR_MODEL", length = 50)
 	private String model;
 
-	@Column
+	@Column(name = "MANUFACTURE_YEAR")
 	private Integer year;
 }
