@@ -22,15 +22,16 @@ import com.sanju.model.Student;
 import com.sanju.repo.GenericRepo;
 import com.sanju.repo.StudentRepo;
 import com.sanju.response.StudentRequest;
+import com.sanju.service.StudentService;
 
 @RestController
 public class TestController {
 
 	@Autowired
 	private GenericRepo genericRepo;
-
+	
 	@Autowired
-	private StudentRepo studentRepo;
+	private StudentService studentService;
 
 	@GetMapping("/students/details")
 	private ResponseEntity<Object> studentsDetails() {
@@ -58,32 +59,17 @@ public class TestController {
 
 	@DeleteMapping("/delete/student/{studentId}")
 	private ResponseEntity<Object> deleteStudent(@PathVariable Integer studentId) {
-		studentRepo.deleteById(studentId);
+		
+		studentService.deleteStudent(studentId);
+		
 		return new ResponseEntity<Object>("Student Deleted Successfully", HttpStatus.OK);
 	}
 
 	@PostMapping("/register/student")
 	private ResponseEntity<Object> registerStudent(@RequestBody StudentRequest studentReq) {
-		Student student = new Student();
-		List<Course> courses = new ArrayList<>();
-		if (studentReq.getCourseIds() != null) {
-			for (Integer courseId : studentReq.getCourseIds()) {
-				Course course = new Course();
-				course.setCourseId(courseId);
-				courses.add(course);
-			}
-		}
-		student.setCourses(courses);
-		BeanUtils.copyProperties(studentReq, student);
-
-		if (studentReq.getInstituteId() != null) {
-			Institute institute = new Institute();
-			institute.setInstituteId(studentReq.getInstituteId());
-
-			student.setInstituteId(institute);
-		}
-
-		studentRepo.save(student);
+		
+		studentService.registerStudent(studentReq);
+		
 		return new ResponseEntity<Object>("Student Saved Successfully", HttpStatus.OK);
 	}
 

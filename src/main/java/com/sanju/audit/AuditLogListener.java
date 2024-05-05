@@ -2,7 +2,6 @@ package com.sanju.audit;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
-import java.util.stream.Stream;
 
 import org.hibernate.event.spi.PostDeleteEvent;
 import org.hibernate.event.spi.PostDeleteEventListener;
@@ -17,6 +16,8 @@ import org.springframework.stereotype.Component;
 import com.sanju.model.AuditLog;
 import com.sanju.repo.AuditLogRepository;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 
 @Component
@@ -25,97 +26,6 @@ public class AuditLogListener implements PostInsertEventListener, PostUpdateEven
 	@Autowired
 	private AuditLogRepository auditLogRepository;
 
-//	@Override
-//	public void onPostInsert(PostInsertEvent event) {
-//		Object entity = event.getEntity();
-//		if (!(entity instanceof AuditLog)) {
-//			AuditLog auditLog = new AuditLog();
-//			auditLog.setTableName(getTableName(entity.getClass()));
-//			auditLog.setAction("INSERT");
-//
-////			String username = SecurityContextHolder.getContext().getAuthentication().getName();
-//			String username = null;
-//			auditLog.setUsername(username);
-//
-//			LocalDateTime timestamp = LocalDateTime.now();
-//			auditLog.setTimestamp(timestamp);
-//			auditLog.setEntityId(event.getId().toString());
-//			auditLog.setNewValue(getEntityData(entity));
-//
-//			auditLogRepository.save(auditLog);
-//		}
-//	}
-//
-//	@Override
-//	public void onPostUpdate(PostUpdateEvent event) {
-//		Object entity = event.getEntity();
-//		if (!(entity instanceof AuditLog)) {
-//			AuditLog auditLog = new AuditLog();
-//			auditLog.setTableName(getTableName(entity.getClass()));
-//			auditLog.setAction("UPDATE");
-//
-////			String username = SecurityContextHolder.getContext().getAuthentication().getName();
-//			String username = null;
-//			auditLog.setUsername(username);
-//
-//			LocalDateTime timestamp = LocalDateTime.now();
-//			auditLog.setTimestamp(timestamp);
-//			auditLog.setEntityId(event.getId().toString());
-//			Object[] oldState = event.getOldState();
-//			StringBuilder sb = new StringBuilder();
-//			for (int i = 0; i < oldState.length; i++) {
-//				if (oldState[i] != null) {
-//					if (sb.length() > 0) {
-//						sb.append(", ");
-//					}
-//					sb.append(event.getPersister().getPropertyNames()[i]).append(": ").append(oldState[i]);
-//				}
-//			}
-//			auditLog.setOldValue(getEntityData(sb));
-//			auditLog.setNewValue(getEntityData(entity));
-//
-//			auditLogRepository.save(auditLog);
-//		}
-//	}
-
-	@Override
-	public void onPostDelete(PostDeleteEvent event) {
-		Object entity = event.getEntity();
-		if (!(entity instanceof AuditLog)) {
-			AuditLog auditLog = new AuditLog();
-			auditLog.setTableName((getTableName(entity.getClass())));
-			auditLog.setAction("DELETE");
-
-			String username = null;
-			auditLog.setUsername(username);
-
-			LocalDateTime timestamp = LocalDateTime.now();
-			auditLog.setTimestamp(timestamp);
-			auditLog.setEntityId(event.getId().toString());
-
-			auditLogRepository.save(auditLog);
-		}
-	}
-
-	private String getEntityData(Object entity) {
-		return entity.toString();
-	}
-
-	@Override
-	public boolean requiresPostCommitHandling(EntityPersister persister) {
-		return true;
-	}
-
-	public static String getTableName(Class<?> entityClass) {
-		Table tableAnnotation = entityClass.getAnnotation(Table.class);
-		if (tableAnnotation != null) {
-			String tableName = tableAnnotation.name();
-			if (!tableName.isEmpty()) {
-				return tableName.toUpperCase();
-			}
-		}
-		return null;
-	}
 
 	@Override
 	public void onPostInsert(PostInsertEvent event) {
@@ -142,10 +52,51 @@ public class AuditLogListener implements PostInsertEventListener, PostUpdateEven
 	        LocalDateTime timestamp = LocalDateTime.now();
 
 	        Object[] oldState = event.getOldState();
-	        Object[] newState = event.getState();
+//	        Object[] newState = event.getState();
 
 	        saveFieldChanges(entity, oldState, tableName, entityId, action, username, timestamp);
 	    }
+	}
+	
+	@Override
+	public void onPostDelete(PostDeleteEvent event) {
+		Object entity = event.getEntity();
+		Object[] deletedState = event.getDeletedState();
+		if (!(entity instanceof AuditLog)) {
+			String tableName = getTableName(entity.getClass());
+			String entityId = event.getId().toString();
+			String action = "DELETE";
+			String username = null;
+			LocalDateTime timestamp = LocalDateTime.now();
+
+			try {
+				saveDeleteRecord(tableName, entityId, action, username, timestamp, deletedState);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void saveDeleteRecord(String tableName, String entityId, String action, String username, LocalDateTime timestamp, Object[] deletedState) throws IllegalArgumentException, IllegalAccessException {
+		AuditLog auditLog = new AuditLog();
+		auditLog.setTableName(tableName);
+		auditLog.setAction(action);
+		auditLog.setUsername(username);
+		auditLog.setTimestamp(timestamp);
+		auditLog.setEntityId(entityId);
+		
+//		StringBuilder deletedStateBuilder = new StringBuilder();
+//	    if (deletedState != null) {
+//	        for (int i = 0; i < deletedState.length; i++) {
+//	            if (i > 0) {
+//	                deletedStateBuilder.append(", ");
+//	            }
+//	            deletedStateBuilder.append(deletedState[i]);
+//	        }
+//	    }
+//	    auditLog.setOldValue(deletedStateBuilder.toString());
+
+		auditLogRepository.save(auditLog);
 	}
 	
 	private void saveFieldChanges(Object entity, Object[] oldState, String tableName, String entityId, String action,
@@ -158,12 +109,15 @@ public class AuditLogListener implements PostInsertEventListener, PostUpdateEven
 				String fieldName = field.getName();
 				Object oldValue = null;
 				Object newValue = field.get(entity);
-				
+
 				if (oldState != null && oldState.length != 0) {
 					for (Object obj : oldState) {
 						Class<?> clazzOs = obj.getClass();
 						Field[] fieldsOs = clazzOs.getDeclaredFields();
 						for (Field fieldOs : fieldsOs) {
+							if (fieldOs.getType() == byte[].class) {
+								continue;
+							}
 							fieldOs.setAccessible(true);
 							String fieldNameOs = fieldOs.getName();
 							if (fieldName.equalsIgnoreCase(fieldNameOs)) {
@@ -173,11 +127,9 @@ public class AuditLogListener implements PostInsertEventListener, PostUpdateEven
 						}
 					}
 				}
-				
-				if (oldValue != null) {
-					if ((oldValue == null && newValue == null) || (oldValue.equals(newValue))) {
-						continue; // Skip if both old and new values are null or same
-					}
+
+				if ((oldValue == null && newValue == null) || (oldValue != null && oldValue.equals(newValue))) {
+					continue;
 				}
 
 				AuditLog auditLog = new AuditLog();
@@ -186,7 +138,7 @@ public class AuditLogListener implements PostInsertEventListener, PostUpdateEven
 				auditLog.setUsername(username);
 				auditLog.setTimestamp(timestamp);
 				auditLog.setEntityId(entityId);
-				auditLog.setColumnName(fieldName);
+				auditLog.setColumnName(getColumnName(field));
 				auditLog.setOldValue((oldValue != null) ? oldValue.toString() : null);
 				auditLog.setNewValue((newValue != null) ? newValue.toString() : null);
 
@@ -196,4 +148,40 @@ public class AuditLogListener implements PostInsertEventListener, PostUpdateEven
 			e.printStackTrace();
 		}
 	}
+	
+	public static String getTableName(Class<?> entityClass) {
+		Table tableAnnotation = entityClass.getAnnotation(Table.class);
+		if (tableAnnotation != null) {
+			String tableName = tableAnnotation.name();
+			if (!tableName.isEmpty()) {
+				return tableName.toUpperCase();
+			}
+		}
+		return null;
+	}
+	
+	public static String getColumnName(Field field) {
+		String columnName = null;
+		
+		Column columnAnnotation = field.getAnnotation(Column.class);
+		if (columnAnnotation != null && !columnAnnotation.name().isEmpty()) {
+			columnName = columnAnnotation.name().toUpperCase();
+		} else {
+			JoinColumn joinColumnAnnotation = field.getAnnotation(JoinColumn.class);
+			if (joinColumnAnnotation != null && !joinColumnAnnotation.name().isEmpty()) {
+				columnName = joinColumnAnnotation.name().toUpperCase();
+			}
+		}
+		
+		return columnName;
+	}
+	
+	@Override
+	public boolean requiresPostCommitHandling(EntityPersister persister) {
+		return true;
+	}
+	
+//	private String getEntityData(Object entity) {
+//		return entity.toString();
+//	}
 }

@@ -3,7 +3,6 @@ package com.sanju.model;
 import java.util.List;
 
 import jakarta.annotation.Nonnull;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -36,10 +35,10 @@ public class Student {
 	@Column(name = "STUDENT_NAME")
 	private String studentName;
 
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne//(cascade = CascadeType.ALL)
 	@JoinColumn(name = "INSTITUTE_ID"/* , referencedColumnName = "institute_id" */)
 	private Institute instituteId;
 
-	@ManyToMany(cascade = CascadeType.ALL/* , mappedBy = "students" */)
+	@ManyToMany//(cascade = CascadeType.ALL/* , mappedBy = "students" */)
 	private List<Course> courses;
 }

@@ -23,6 +23,6 @@ public class EnversConfiguration {
 		EventListenerRegistry registry = sessionFactory.getServiceRegistry().getService(EventListenerRegistry.class);
 		registry.appendListeners(EventType.POST_INSERT, auditLogListener);
 //		registry.appendListeners(EventType.POST_UPDATE, auditLogListener);
-//		registry.appendListeners(EventType.POST_DELETE, auditLogListener);
+		registry.appendListeners(EventType.POST_DELETE, auditLogListener);
 	}
 }

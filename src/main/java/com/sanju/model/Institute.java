@@ -1,16 +1,12 @@
 package com.sanju.model;
 
-import java.util.List;
-
 import jakarta.annotation.Nonnull;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -37,10 +33,10 @@ public class Institute {
 	private String instituteName;
 
 //	@Nonnull
-	@OneToOne(cascade = CascadeType.ALL)
+	@OneToOne//(cascade = CascadeType.ALL)
 	@JoinColumn(name = "ADDRESS_ID")
 	private Address address;
 
-	@OneToMany(cascade = CascadeType.ALL)
-	private List<Student> students;
+//	@OneToMany(cascade = CascadeType.ALL)
+//	private List<Student> students;
 }

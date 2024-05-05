@@ -40,7 +40,7 @@ public class MappingRunner implements CommandLineRunner {
 		instituteAddress.setInstituteId(itSoft);
 
 		itSoft.setAddress(instituteAddress);
-		itSoft.setStudents(List.of(sanju, prakash));
+//		itSoft.setStudents(List.of(sanju, prakash));
 
 		sanju.setInstituteId(itSoft);
 		prakash.setInstituteId(itSoft);
