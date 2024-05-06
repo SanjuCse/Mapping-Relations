@@ -13,6 +13,8 @@ import org.hibernate.persister.entity.EntityPersister;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sanju.model.AuditLog;
 import com.sanju.repo.AuditLogRepository;
 
@@ -25,39 +27,41 @@ public class AuditLogListener implements PostInsertEventListener, PostUpdateEven
 
 	@Autowired
 	private AuditLogRepository auditLogRepository;
-
+	
+	public static final String INSERT = "INSERT";
+	public static final String UPDATE = "UPDATE";
+	public static final String DELETE = "DELETE";
 
 	@Override
 	public void onPostInsert(PostInsertEvent event) {
-	    Object entity = event.getEntity();
-	    if (!(entity instanceof AuditLog)) {
-	        String tableName = getTableName(entity.getClass());
-	        String entityId = event.getId().toString();
-	        String action = "INSERT";
-	        String username = null;
-	        LocalDateTime timestamp = LocalDateTime.now();
+		Object entity = event.getEntity();
+		if (!(entity instanceof AuditLog)) {
+			String tableName = getTableName(entity.getClass());
+			String entityId = event.getId().toString();
+			String action = INSERT;
+			Long userId = null; // TODO: Need to get from Security Context Holder
+			LocalDateTime timestamp = LocalDateTime.now();
 
-	        saveFieldChanges(entity, null, tableName, entityId, action, username, timestamp);
-	    }
+			saveFieldChanges(entity, tableName, entityId, action, userId, timestamp);
+//			int deleteCount = auditLogRepository.deleteSecondLastRecord(Long.valueOf(entityId), INSERT);
+//			log.info(deleteCount+" records deleted");
+		}
 	}
 
 	@Override
 	public void onPostUpdate(PostUpdateEvent event) {
-	    Object entity = event.getEntity();
-	    if (!(entity instanceof AuditLog)) {
-	        String tableName = getTableName(entity.getClass());
-	        String entityId = event.getId().toString();
-	        String action = "UPDATE";
-	        String username = null;
-	        LocalDateTime timestamp = LocalDateTime.now();
+		Object entity = event.getEntity();
+		if (!(entity instanceof AuditLog)) {
+			String tableName = getTableName(entity.getClass());
+			String entityId = event.getId().toString();
+			String action = UPDATE;
+			Long userId = null; // TODO: Need to get from Security Context Holder
+			LocalDateTime timestamp = LocalDateTime.now();
 
-	        Object[] oldState = event.getOldState();
-//	        Object[] newState = event.getState();
-
-	        saveFieldChanges(entity, oldState, tableName, entityId, action, username, timestamp);
-	    }
+			saveFieldChanges(entity, tableName, entityId, action, userId, timestamp);
+		}
 	}
-	
+
 	@Override
 	public void onPostDelete(PostDeleteEvent event) {
 		Object entity = event.getEntity();
@@ -65,91 +69,47 @@ public class AuditLogListener implements PostInsertEventListener, PostUpdateEven
 		if (!(entity instanceof AuditLog)) {
 			String tableName = getTableName(entity.getClass());
 			String entityId = event.getId().toString();
-			String action = "DELETE";
-			String username = null;
+			String action = DELETE;
+			Long userId = null; // TODO: Need to get from Security Context Holder
 			LocalDateTime timestamp = LocalDateTime.now();
 
-			try {
-				saveDeleteRecord(tableName, entityId, action, username, timestamp, deletedState);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			saveDeleteRecord(tableName, entityId, action, userId, timestamp, deletedState);
 		}
 	}
 
-	private void saveDeleteRecord(String tableName, String entityId, String action, String username, LocalDateTime timestamp, Object[] deletedState) throws IllegalArgumentException, IllegalAccessException {
+	private void saveDeleteRecord(String tableName, String entityId, String action, Long userId,
+			LocalDateTime timestamp, Object[] deletedState) {
 		AuditLog auditLog = new AuditLog();
 		auditLog.setTableName(tableName);
 		auditLog.setAction(action);
-		auditLog.setUsername(username);
+		auditLog.setUserId(userId);
 		auditLog.setTimestamp(timestamp);
-		auditLog.setEntityId(entityId);
-		
-//		StringBuilder deletedStateBuilder = new StringBuilder();
-//	    if (deletedState != null) {
-//	        for (int i = 0; i < deletedState.length; i++) {
-//	            if (i > 0) {
-//	                deletedStateBuilder.append(", ");
-//	            }
-//	            deletedStateBuilder.append(deletedState[i]);
-//	        }
-//	    }
-//	    auditLog.setOldValue(deletedStateBuilder.toString());
+		auditLog.setPkId(Long.valueOf(entityId));
 
 		auditLogRepository.save(auditLog);
 	}
-	
-	private void saveFieldChanges(Object entity, Object[] oldState, String tableName, String entityId, String action,
-			String username, LocalDateTime timestamp) {
-		try {
-			Class<?> clazz = entity.getClass();
-			Field[] fields = clazz.getDeclaredFields();
-			for (Field field : fields) {
-				field.setAccessible(true);
-				String fieldName = field.getName();
-				Object oldValue = null;
-				Object newValue = field.get(entity);
 
-				if (oldState != null && oldState.length != 0) {
-					for (Object obj : oldState) {
-						Class<?> clazzOs = obj.getClass();
-						Field[] fieldsOs = clazzOs.getDeclaredFields();
-						for (Field fieldOs : fieldsOs) {
-							if (fieldOs.getType() == byte[].class) {
-								continue;
-							}
-							fieldOs.setAccessible(true);
-							String fieldNameOs = fieldOs.getName();
-							if (fieldName.equalsIgnoreCase(fieldNameOs)) {
-								oldValue = fieldOs.get(obj);
-								break;
-							}
-						}
-					}
-				}
+	private void saveFieldChanges(Object obj, String tableName, String pkId, String action, Long userId, LocalDateTime timestamp){
+		if (obj != null) {
+			AuditLog auditLog = new AuditLog();
+			auditLog.setTableName(tableName);
+			auditLog.setAction(action);
+			auditLog.setUserId(userId);
+			auditLog.setTimestamp(timestamp);
+			auditLog.setPkId(Long.valueOf(pkId));
+			auditLog.setJsonValue(getJsonData(obj));
 
-				if ((oldValue == null && newValue == null) || (oldValue != null && oldValue.equals(newValue))) {
-					continue;
-				}
-
-				AuditLog auditLog = new AuditLog();
-				auditLog.setTableName(tableName);
-				auditLog.setAction(action);
-				auditLog.setUsername(username);
-				auditLog.setTimestamp(timestamp);
-				auditLog.setEntityId(entityId);
-				auditLog.setColumnName(getColumnName(field));
-				auditLog.setOldValue((oldValue != null) ? oldValue.toString() : null);
-				auditLog.setNewValue((newValue != null) ? newValue.toString() : null);
-
-				auditLogRepository.save(auditLog);
-			}
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+			auditLogRepository.save(auditLog);
 		}
 	}
+
+
+	@Override
+	public boolean requiresPostCommitHandling(EntityPersister persister) {
+		return true;
+	}
 	
-	public static String getTableName(Class<?> entityClass) {
+	private static String getTableName(Class<?> entityClass) {
 		Table tableAnnotation = entityClass.getAnnotation(Table.class);
 		if (tableAnnotation != null) {
 			String tableName = tableAnnotation.name();
@@ -160,7 +120,7 @@ public class AuditLogListener implements PostInsertEventListener, PostUpdateEven
 		return null;
 	}
 	
-	public static String getColumnName(Field field) {
+	private static String getColumnName(Field field) {
 		String columnName = null;
 		
 		Column columnAnnotation = field.getAnnotation(Column.class);
@@ -175,13 +135,14 @@ public class AuditLogListener implements PostInsertEventListener, PostUpdateEven
 		
 		return columnName;
 	}
-	
-	@Override
-	public boolean requiresPostCommitHandling(EntityPersister persister) {
-		return true;
+
+	private String getJsonData(Object obj) {
+		String jsonValue = null;
+		try {
+			jsonValue = new ObjectMapper().writeValueAsString(obj);
+		} catch (JsonProcessingException e) {
+			
+		}
+		return jsonValue;
 	}
-	
-//	private String getEntityData(Object entity) {
-//		return entity.toString();
-//	}
 }

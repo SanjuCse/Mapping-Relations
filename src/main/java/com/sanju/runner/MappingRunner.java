@@ -37,7 +37,7 @@ public class MappingRunner implements CommandLineRunner {
 
 		Institute itSoft = new Institute("XYZ Institute");
 		Address instituteAddress = new Address("Hyd", "Telengana", "India");
-		instituteAddress.setInstituteId(itSoft);
+//		instituteAddress.setInstituteId(itSoft);
 
 		itSoft.setAddress(instituteAddress);
 //		itSoft.setStudents(List.of(sanju, prakash));

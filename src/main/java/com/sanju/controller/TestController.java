@@ -21,7 +21,9 @@ import com.sanju.model.Institute;
 import com.sanju.model.Student;
 import com.sanju.repo.GenericRepo;
 import com.sanju.repo.StudentRepo;
+import com.sanju.response.CarRequest;
 import com.sanju.response.StudentRequest;
+import com.sanju.service.CarService;
 import com.sanju.service.StudentService;
 
 @RestController
@@ -32,6 +34,9 @@ public class TestController {
 	
 	@Autowired
 	private StudentService studentService;
+	
+	@Autowired
+	private CarService carService;
 
 	@GetMapping("/students/details")
 	private ResponseEntity<Object> studentsDetails() {
@@ -71,6 +76,16 @@ public class TestController {
 		studentService.registerStudent(studentReq);
 		
 		return new ResponseEntity<Object>("Student Saved Successfully", HttpStatus.OK);
+	}
+	
+	@PostMapping("/save/car")
+	private ResponseEntity<Object> saveCar(@RequestBody CarRequest carReq) {
+		Boolean isSaved = carService.saveCar(carReq);
+		
+		if (isSaved) {
+			return new ResponseEntity<Object>("Car Saved Successfully", HttpStatus.OK);
+		}
+		return new ResponseEntity<Object>("Unable to Save Car", HttpStatus.OK);
 	}
 
 	private String doCamelCase(String originalString) {
